@@ -13,11 +13,14 @@ import pygame
 import fcntl, sys, os
 import thread
 import errno
+import logging
+import logging.handlers
 
 # define variables
 pid_file = '/var/run/bell.pid'
-sound_basedir="/home/pi/sound/"
+sound_basedir="/usr/local/bell-controller/sound/"
 fifo_file = '/var/run/bell.fifo'
+BUFFER_SIZE = 500
 
 def audio_filename(pin):
     #print pin
@@ -26,6 +29,13 @@ def audio_filename(pin):
         27: "2-FUNERALE.wav",
         22: "3-ORA_PIA.wav",
     }.get(pin, "") 
+
+def audio_fifo(filename):
+    if os.path.isfile(sound_basedir + filename):
+        play_audio(filename)
+    else:
+        my_logger.debug("No match with filename %s" % filename)
+        return False
 
 ## now we'll define two threaded callback functions
 ## these will run in another thread when our events are detected
@@ -45,15 +55,15 @@ def audio_filename(pin):
 
 def play_audio(filename):
     if pygame.mixer.music.get_busy() == True:
-        print "another audio is already playing"
+        my_logger.debug("another audio is already playing")
         return
     # turn on the main output
     GPIO.output(26, GPIO.LOW)
 #    pygame.mixer.init()
-    print "start audio"
+    my_logger.debug("start audio")
     #pygame.mixer.music.load(sound_basedir + "sos.mp3")
     pygame.mixer.music.load(sound_basedir + filename)
-    print "play " + sound_basedir + filename 
+    my_logger.debug("play " + sound_basedir + filename)
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy() == True:
         time.sleep(0.020)
@@ -62,40 +72,40 @@ def play_audio(filename):
     GPIO.output(26, GPIO.HIGH)
 
 def stop_audio(pin):
-    print "stop all audio"
+    my_logger.debug("stop all audio")
     #pygame.mixer.init()
     if pygame.mixer.music.get_busy() == True:
         try:
             pygame.mixer.music.fadeout(500)
             pygame.mixer.music.stop()
         except pygame.error(e):
-            print "error" + e
+            my_logger.debug("error" + e)
             pass
     else:
-        print "no current audio playing, not stopping"
+        my_logger.debug("no current audio playing, not stopping")
     
 def shutdown_request(channel):
-    print "change in GPIO: ", channel
-    print GPIO.input(channel)
+    my_logger.debug("change in GPIO: ", channel)
+    my_logger.debug(GPIO.input(channel))
     # double check current input
     if GPIO.input(channel):
         #print str(datetime.datetime.now()), " Shutdown request"
-        print str(time.strftime("%H.%M.%S - %d %m %Y")), " Shutdown request"
+        my_logger.debug(str(time.strftime("%H.%M.%S - %d %m %Y")), " Shutdown request")
         sys.stdout.flush()
         os.system('/sbin/shutdown -h now')
         
 def gpio_pressed(pin):
     # debug
-    print "current pin status: 17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % (GPIO.input(17), GPIO.input(27), GPIO.input(22), GPIO.input(13), GPIO.input(6))
-    print "pin: %s" % pin
+    my_logger.debug("current pin status: 17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % (GPIO.input(17), GPIO.input(27), GPIO.input(22), GPIO.input(13), GPIO.input(6)))
+    my_logger.debug("pin: %s" % pin)
     #print pin
     # doublecheck input
     if ( GPIO.input(pin) != 1):
-        print "quirk input: asked for pin %s that is off currently" % pin
+        my_logger.debug("quirk input: asked for pin %s that is off currently" % pin)
         return
     audio = audio_filename(pin)
     if ( audio != "" ):
-        print "play audio: audio"
+        my_logger.debug("play audio: audio")
         thread.start_new_thread(play_audio, (audio,))
     if ( pin == 13 ):
         stop_audio(pin)
@@ -103,13 +113,18 @@ def gpio_pressed(pin):
         shutdown_request(pin)
 
 # main()
+my_logger = logging.getLogger('BellCtrl')
+my_logger.setLevel(logging.DEBUG)
+
+handler = logging.handlers.SysLogHandler(address = '/dev/log')
+my_logger.addHandler(handler)
 
 # check if another process is running
 fp = open(pid_file, 'w')
 try:
     fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
 except IOError:
-    print "another instance of this program is running"
+    my_logger.debug("another instance of this program is running")
     sys.exit(0)
 
 # initialize the mixer to be used later
@@ -119,7 +134,8 @@ pygame.mixer.init()
 try:
     os.mkfifo(fifo_file)
 except OSError, e:
-    print "Failed to create FIFO: %s, continuing anyway" % e
+    my_logger.debug("Failed to create FIFO: %s, continuing anyway" % e)
+# open the pipe
 fifo_fp = os.open(fifo_file, os.O_RDONLY|os.O_NONBLOCK)
 
 # initialize GPIO
@@ -153,8 +169,8 @@ GPIO.add_event_detect(13, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 GPIO.add_event_detect(6, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 
 try:
-    print "main()"
-    print ("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
+    my_logger.debug("main()")
+    my_logger.debug("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
     while True:
         prev17 = input17
         input17 = GPIO.input(17)
@@ -167,34 +183,32 @@ try:
         prev6 = input6
         input6 = GPIO.input(6)
         if ( prev17 != input17 or prev27 != input27 or prev22 != input22 or prev13 != input13 or prev6 != input6 ):
-            print ("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
+            my_logger.debug("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
         time.sleep(0.020)
         # TODO implement the code here
         # http://stackoverflow.com/questions/14345816/how-to-read-named-fifo-non-blockingly
         #ext_command = fifo_fp.read()
         #print ext_command
-#        try:
-#            buffer = os.read(io, BUFFER_SIZE)
-#        except OSError as err:
-#            if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
-#                buffer = None
-#            else:
-#                raise  # something else has happened -- better reraise
-#        
-#        if buffer is None: 
-#            # nothing was received -- do something else
-#        else:
-#            # buffer contains some received data -- do something with it
-#                #time.sleep(1)
-#                
+        try:
+            buffer = os.read(fifo_fp, BUFFER_SIZE)
+        except OSError as err:
+            if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
+                buffer = None
+            else:
+                raise  # something else has happened -- better reraise
+        
+        if buffer is not None and buffer != '':  
+            # buffer contains some received data -- do something with it
+            my_logger.debug("buffer: '%s'" % buffer)
+            audio_fifo(buffer)
 
 except KeyboardInterrupt:
-    print "CTRL+C pressed, exiting"
+    my_logger.debug("CTRL+C pressed, exiting")
 finally:
     GPIO.cleanup()       # clean up GPIO on exiting from try
     pygame.mixer.quit()  # clean up mixer
     os.close(fifo_fp)
-    os.remove(fifo_fp)
+    os.remove(fifo_file)
     fp.close()
     os.remove(pid_file)
 

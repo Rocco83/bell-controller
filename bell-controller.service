@@ -1,0 +1,12 @@
+[Unit]
+Description=Bell Controller
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+ExecStart=/usr/local/bell-controller/controller.py
+Wants=network-online.target
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
