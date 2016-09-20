@@ -1,7 +1,48 @@
-# bell-controller
-Church bell controller
+# Bell Controller
+## A bell controller, designed for church
 
-built on debian jessie with python 2.7
-package needed:
-python-rpi.gpio
-To be checked for other dependencies
+This software has been built on Debian Jessie, on a Raspberry PI 2, using python 2.7.
+
+### Packages needed
+* python (main debian repository)
+* python-rpi.gpio (main raspbian repository)
+
+To be checked for other dependencies.
+
+### Instructions
+#### General informations
+* this daemon is tested in `/usr/local/bell-controller` directory.
+* Sounds to be played have to be placed in sound/ directory. Files inside need to have no spaces or other non ASCII character into the file name.
+* The file can be played also from external sources using the fifo created by the daemon. 
+
+#### Autostart as a service 
+1. put the repository on `/usr/local/bell-controller`
+2. copy the `bell-controller.service` file into `/etc/systemd/system/bell-controller.service`
+3. run `systemctl enable bell-controller.service`
+
+#### Play file from an external source 
+The fifo is hardcoded into `/var/run/bell.fifo`
+
+In order to play one file, simply put into the pipe the filename you want to play.
+
+The file name will be looked into `sound/` directory and played if exists.
+
+
+
+
+#### Customization of the daemon
+Current pins are hardcoded
+|function|pin number|GPIO number|
+|Play "FESTA"|11|GPIO 17|
+|Play "FUNERALE"|13|GPIO 27|
+|Play "ORA_PIA"|15|GPIO 22|
+|Stop all play|33|GPIO 13|
+|shutdown|35|GPIO 19|
+
+Currently filename are hardcoded and bonded to one GPIO.
+````
+  * GPIO 17: "1-FESTA.wav",
+  * GPIO 27: "2-FUNERALE.wav",
+  * GPIO 22: "3-ORA_PIA.wav",```
+````
+
