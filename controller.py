@@ -15,6 +15,8 @@ import thread
 import errno
 import logging
 import logging.handlers
+import string
+import signal
 
 # define variables
 pid_file = '/var/run/bell.pid'
@@ -34,7 +36,7 @@ def audio_fifo(filename):
     if os.path.isfile(sound_basedir + filename):
         play_audio(filename)
     else:
-        my_logger.debug("No match with filename %s" % filename)
+        my_logger.debug("No match with filename '%s%s'" % (sound_basedir, filename))
         return False
 
 ## now we'll define two threaded callback functions
@@ -112,8 +114,17 @@ def gpio_pressed(pin):
     if ( pin == 6 ):
         shutdown_request(pin)
 
+def clean_exit():
+#    GPIO.cleanup()       # clean up GPIO on exiting from try
+#    pygame.mixer.quit()  # clean up mixer
+#    os.close(fifo_fp)
+#    os.remove(fifo_file)
+#    fp.close()
+#    os.remove(pid_file)
+    my_logger.debug("DUMMY cleanup completed, exit now")
+
 # main()
-my_logger = logging.getLogger('BellCtrl')
+my_logger = logging.getLogger(__name__)
 my_logger.setLevel(logging.DEBUG)
 
 handler = logging.handlers.SysLogHandler(address = '/dev/log')
@@ -131,10 +142,15 @@ except IOError:
 pygame.mixer.init()
 
 # create the FIFO and open it
+# delete it before if needed
 try:
+    if os.path.exists(fifo_file):
+        my_logger.debug("%s existing, removing" % fifo_file)
+        os.remove(fifo_file)
     os.mkfifo(fifo_file)
 except OSError, e:
-    my_logger.debug("Failed to create FIFO: %s, continuing anyway" % e)
+    my_logger.debug("Failed to create FIFO, error: '%s', fatal error" % e)
+    sys.exit(1)
 # open the pipe
 fifo_fp = os.open(fifo_file, os.O_RDONLY|os.O_NONBLOCK)
 
@@ -168,6 +184,9 @@ GPIO.add_event_detect(22, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 GPIO.add_event_detect(13, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 GPIO.add_event_detect(6, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 
+# add handler for signals
+signal.signal(signal.SIGTERM, clean_exit)
+
 try:
     my_logger.debug("main()")
     my_logger.debug("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
@@ -196,14 +215,17 @@ try:
                 buffer = None
             else:
                 raise  # something else has happened -- better reraise
-        
-        if buffer is not None and buffer != '':  
-            # buffer contains some received data -- do something with it
-            my_logger.debug("buffer: '%s'" % buffer)
-            audio_fifo(buffer)
+        #buffer_clean = lambda dirty: ''.join(filter(string.printable.__contains__, buffer))
+        buffer_clean = buffer.strip('\n\r')
+        if buffer_clean is not None and buffer_clean != '':  
+            # buffer_clean contains some received data -- do something with it
+            my_logger.debug("buffer_clean: '%s'" % buffer_clean)
+            audio_fifo(buffer_clean)
 
 except KeyboardInterrupt:
     my_logger.debug("CTRL+C pressed, exiting")
+except:
+    my_logger.debug("Unknown exit reason, exiting")
 finally:
     GPIO.cleanup()       # clean up GPIO on exiting from try
     pygame.mixer.quit()  # clean up mixer
@@ -211,4 +233,6 @@ finally:
     os.remove(fifo_file)
     fp.close()
     os.remove(pid_file)
+    my_logger.debug("cleanup completed, exit now")
+
 
