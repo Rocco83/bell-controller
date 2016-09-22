@@ -16,6 +16,8 @@ To be checked for other dependencies.
 * The file can be played also from external sources using the fifo created by the daemon. 
 * Pinout description can be found in the official web site https://www.raspberrypi.org/documentation/usage/gpio-plus-and-raspi2/ or in a more clean way in https://github.com/Dot-and-Net/IoTHelpers/wiki/Raspberry-Pi-2-and-3-Pinout
 
+More information about the expected behavior are in [info.md](info.md)
+
 #### Autostart as a service 
 1. put the repository on `/usr/local/bell-controller`
 2. copy the `bell-controller.service` file into `/etc/systemd/system/bell-controller.service`
@@ -33,12 +35,14 @@ The file name will be looked into `sound/` directory and played if exists.
 
 #### Customization of the daemon
 Current pins are hardcoded
-|function|pin number|GPIO number|
-|Play "FESTA"|11|GPIO 17|
-|Play "FUNERALE"|13|GPIO 27|
-|Play "ORA_PIA"|15|GPIO 22|
-|Stop all play|33|GPIO 13|
-|shutdown|35|GPIO 19|
+
+| function        | pin number | Pin definition |
+|-----------------|------------|----------------|
+| Play "FESTA"    | 11         | GPIO 17        |
+| Play "FUNERALE" | 13         | GPIO 27        |
+| Play "ORA_PIA"  | 15         | GPIO 22        |
+| Stop all play   | 33         | GPIO 13        |
+| shutdown        | 35         | GPIO 19        |
 
 Currently filename are hardcoded and bonded to one GPIO.
 ````
@@ -46,6 +50,19 @@ Currently filename are hardcoded and bonded to one GPIO.
   * GPIO 27: "2-FUNERALE.wav",
   * GPIO 22: "3-ORA_PIA.wav",```
 ````
+
+#### Other current hardware link
+
+| Item             | function | pin number | Pin definition |
+|------------------|----------|------------|----------------|
+| Coupling circuit | power    | 4          | 5V             |
+| Coupling circuit | GND      | 6          | GND            |
+| Relais           | power    | 2          | 5V             |
+| Relais           | GND      | 9          | GND            |
+| Relais           | switch   | 37         | GPIO 26        |
+| LED Raspberry    | power    | 17         | 3,3V           |
+| LED Raspberry    | GND      | 20         | GND            |
+
 
 ## TODO
 ### Web interface
