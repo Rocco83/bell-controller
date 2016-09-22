@@ -14,6 +14,7 @@ To be checked for other dependencies.
 * this daemon is tested in `/usr/local/bell-controller` directory.
 * Sounds to be played have to be placed in sound/ directory. Files inside need to have no spaces or other non ASCII character into the file name.
 * The file can be played also from external sources using the fifo created by the daemon. 
+* Pinout description can be found in the official web site https://www.raspberrypi.org/documentation/usage/gpio-plus-and-raspi2/ or in a more clean way in https://github.com/Dot-and-Net/IoTHelpers/wiki/Raspberry-Pi-2-and-3-Pinout
 
 #### Autostart as a service 
 1. put the repository on `/usr/local/bell-controller`
@@ -46,3 +47,12 @@ Currently filename are hardcoded and bonded to one GPIO.
   * GPIO 22: "3-ORA_PIA.wav",```
 ````
 
+## TODO
+### Web interface
+A web interface is needed to change the cron
+
+### Privilege sepaeration
+The root user is not really needed to run this software. Especially if the web server has to be implemented to change the cron.
+
+### Definition of GPIO and functions in a json/xml/... file
+The code should be clean from the hardcoded pin
