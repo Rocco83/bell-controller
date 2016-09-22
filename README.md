@@ -63,6 +63,13 @@ Currently filename are hardcoded and bonded to one GPIO.
 | LED Raspberry    | power    | 17         | 3,3V           |
 | LED Raspberry    | GND      | 20         | GND            |
 
+#### Hardware structure
+
+There are two main component outside raspberry.
+
+1. One coupling circuit. This include optocoupler to separate the power from the button/other thing to raspberry.
+2. One relais circuit. The one used is like http://www.sainsmart.com/arduino-pro-mini.html
+
 
 ## TODO
 ### Web interface
