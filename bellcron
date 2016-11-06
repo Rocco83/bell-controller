@@ -6,18 +6,26 @@
 #
 # all x min = */x
 # can be tested with http://cron.schlitt.info/index.php
+# usage of printf is preferable http://serverfault.com/questions/169706/strange-problem-with-crontab-and-echo
+# cron is using dash, therefore may cause issue
 
-# Monday - Thursday, Saturday
-0 17 * * 1-4,6 root echo -e "1-FESTA.wav" > /run/bell.fifo
-25 17 * * 1-4,6 root echo -e "1-FESTA.wav" > /run/bell.fifo
-# Friday
-0 16 * * 5 root echo -e "1-FESTA.wav" > /run/bell.fifo
-25 16 * * 5 root echo -e "1-FESTA.wav" > /run/bell.fifo
-0 17 * * 5 root echo -e "1-FESTA.wav" > /run/bell.fifo
-25 17 * * 5 root echo -e "1-FESTA.wav" > /run/bell.fifo
+# Monday - Friday
+55 16 * * 1-5 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 17 * * 1-5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 17 * * 1-5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 17 * * 1-5 root /usr/bin/printf "26-off" > /run/bell.fifo
+# Saturday
+55 16 * * 6 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 17 * * 6 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 17 * * 6 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 18 * * 6 root /usr/bin/printf "26-off" > /run/bell.fifo
 # Sunday
-45 10 * * 0 root echo -e "1-FESTA.wav" > /run/bell.fifo
-10 11 * * 0 root echo -e "1-FESTA.wav" > /run/bell.fifo
-0 18 * * 0 root echo -e "1-FESTA.wav" > /run/bell.fifo
-25 18 * * 0 root echo -e "1-FESTA.wav" > /run/bell.fifo
+40 10 * * 0 root /usr/bin/printf "26-on" > /run/bell.fifo
+45 10 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+10 11 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+15 12 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
+55 17 * * 0 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 18 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 18 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+20 19 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
 

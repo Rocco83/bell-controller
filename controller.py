@@ -32,11 +32,31 @@ def audio_filename(pin):
         22: "3-ORA_PIA.wav",
     }.get(pin, "") 
 
-def audio_fifo(filename):
+# If the fifo is a filename, play it.
+# If this is not, and this is a number with a state, do it.
+def run_fifo(filename):
+    my_logger.debug("handling buffer '%s'" % (filename))
+    pinNumber = None
+    pinAction = None
+    #try:
+    pinNumber, pinAction = filename.split('-')
+    my_logger.debug("pinNumber '%s', pinAction '%s'" % (pinNumber, pinAction))
+    #except:
+    #  pass
     if os.path.isfile(sound_basedir + filename):
         play_audio(filename)
+    elif pinNumber.isdigit() and pinAction in ('on', 'off'):
+        my_logger.debug("Changing output string '%s', int '%d'. to value '%s'" % (pinNumber, int(pinNumber), pinAction))
+        # turn the pin
+        if pinAction == 'on':
+            # turn on
+            pinValue = GPIO.LOW
+        else:
+            # turn off
+            pinValue = GPIO.HIGH
+        GPIO.output(int(pinNumber), pinValue)
     else:
-        my_logger.debug("No match with filename '%s%s'" % (sound_basedir, filename))
+        my_logger.debug("No match with filename '%s%s' and no match with pin '%s' and action '%s'" % (sound_basedir, filename, pinNumber, pinValue))
         return False
 
 ## now we'll define two threaded callback functions
@@ -56,11 +76,18 @@ def audio_fifo(filename):
 #    time_stamp2 = time_now
 
 def play_audio(filename):
+    # current main output value
+    ampStatus = GPIO.input(26)
+    my_logger.debug("Current amp status '%d'" % ampStatus)
     if pygame.mixer.music.get_busy() == True:
         my_logger.debug("another audio is already playing")
         return
-    # turn on the main output
-    GPIO.output(26, GPIO.LOW)
+    # turn on the main output if not already on
+    if (ampStatus == 1):
+        my_logger.debug("Turning on amp")
+        GPIO.output(26, GPIO.LOW)
+    else:
+        my_logger.debug("amp is already powered on, no action")
 #    pygame.mixer.init()
     my_logger.debug("start audio")
     #pygame.mixer.music.load(sound_basedir + "sos.mp3")
@@ -70,8 +97,10 @@ def play_audio(filename):
     while pygame.mixer.music.get_busy() == True:
         time.sleep(0.020)
         continue
-    # turn off the main output
-    GPIO.output(26, GPIO.HIGH)
+    # turn off the main output if it was off
+    if (ampStatus == 1):
+        my_logger.debug("Turning off amp")
+        GPIO.output(26, GPIO.HIGH)
 
 def stop_audio(pin):
     my_logger.debug("stop all audio")
@@ -85,6 +114,9 @@ def stop_audio(pin):
             pass
     else:
         my_logger.debug("no current audio playing, not stopping")
+    # turn off the amplifier
+    my_logger.debug("Turning off amp")
+    GPIO.output(26, GPIO.HIGH)
     
 def shutdown_request(channel):
     my_logger.debug("change in GPIO: ", channel)
@@ -107,7 +139,7 @@ def gpio_pressed(pin):
         return
     audio = audio_filename(pin)
     if ( audio != "" ):
-        my_logger.debug("play audio: audio")
+        my_logger.debug("play audio: '%s'" % audio)
         thread.start_new_thread(play_audio, (audio,))
     if ( pin == 13 ):
         stop_audio(pin)
@@ -220,12 +252,12 @@ try:
         if buffer_clean is not None and buffer_clean != '':  
             # buffer_clean contains some received data -- do something with it
             my_logger.debug("buffer_clean: '%s'" % buffer_clean)
-            audio_fifo(buffer_clean)
+            run_fifo(buffer_clean)
 
 except KeyboardInterrupt:
     my_logger.debug("CTRL+C pressed, exiting")
-except:
-    my_logger.debug("Unknown exit reason, exiting")
+except Exception, e:
+    my_logger.debug("Not handled exception '%s', exiting", e)
 finally:
     GPIO.cleanup()       # clean up GPIO on exiting from try
     pygame.mixer.quit()  # clean up mixer
