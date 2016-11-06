@@ -6,7 +6,7 @@ After=network.target network-online.target
 [Service]
 ExecStart=/usr/local/bell-controller/controller.py
 Wants=network-online.target
-Restart=on-abort
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
