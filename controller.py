@@ -146,7 +146,7 @@ def gpio_pressed(pin):
     if ( pin == 6 ):
         shutdown_request(pin)
 
-def clean_exit():
+def clean_exit(signum, frame):
 #    GPIO.cleanup()       # clean up GPIO on exiting from try
 #    pygame.mixer.quit()  # clean up mixer
 #    os.close(fifo_fp)
