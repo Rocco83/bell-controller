@@ -242,13 +242,16 @@ try:
         #print ext_command
         try:
             buffer = os.read(fifo_fp, BUFFER_SIZE)
+            buffer_clean = buffer.strip('\n\r')
         except OSError as err:
             if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                 buffer = None
             else:
                 raise  # something else has happened -- better reraise
         #buffer_clean = lambda dirty: ''.join(filter(string.printable.__contains__, buffer))
-        buffer_clean = buffer.strip('\n\r')
+        # moved in the try above, or the error below may happes 
+        # Not handled exception ''NoneType' object has no attribute 'strip'
+        #buffer_clean = buffer.strip('\n\r')
         if buffer_clean is not None and buffer_clean != '':  
             # buffer_clean contains some received data -- do something with it
             my_logger.debug("buffer_clean: '%s'" % buffer_clean)
