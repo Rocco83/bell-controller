@@ -154,6 +154,7 @@ def clean_exit(signum, frame):
 #    fp.close()
 #    os.remove(pid_file)
     my_logger.debug("DUMMY cleanup completed, exit now")
+    raise SystemExit('clean_exit called from signal')
 
 # main()
 my_logger = logging.getLogger(__name__)
@@ -193,6 +194,7 @@ GPIO.setmode(GPIO.BCM)
 
 # pins already have a pull down resistor in the circuit
 GPIO.setup(26, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(4, GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setup(17, GPIO.IN)
 GPIO.setup(27, GPIO.IN)
 GPIO.setup(22, GPIO.IN)
@@ -262,6 +264,7 @@ except KeyboardInterrupt:
 except Exception, e:
     my_logger.debug("Not handled exception '%s', exiting", e)
 finally:
+    my_logger.debug("Gracefully finally exit")
     GPIO.cleanup()       # clean up GPIO on exiting from try
     pygame.mixer.quit()  # clean up mixer
     os.close(fifo_fp)

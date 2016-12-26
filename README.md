@@ -60,8 +60,11 @@ Currently filename are hardcoded and bonded to one GPIO.
 | Relais           | power    | 2          | 5V             |
 | Relais           | GND      | 9          | GND            |
 | Relais           | switch   | 37         | GPIO 26        |
-| LED Raspberry    | power    | 17         | 3,3V           |
+| LED Raspberry    | power    | 4          | GPIO 4         |
 | LED Raspberry    | GND      | 20         | GND            |
+
+The Raspberry LED will shut down on bell-controller shutdown.
+The other pin will be always powered, linking to 3,3 PWR will therefore keep the led always on.
 
 #### Hardware structure
 
