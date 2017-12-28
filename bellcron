@@ -3,29 +3,81 @@
 # 3. Entry: Day of the month when the process will be started [1-28/29/30/31]
 # 4. Entry: Month of the year when the process will be started [1-12]
 # 5. Entry: Weekday when the process will be started [0-6] [0 is Sunday]
+# 6. Entry: Music the process will play 1-FESTA.wav 2-FUNERALE.wav 3-ORA_PIA.wav
 #
 # all x min = */x
 # can be tested with http://cron.schlitt.info/index.php
 # usage of printf is preferable http://serverfault.com/questions/169706/strange-problem-with-crontab-and-echo
 # cron is using dash, therefore may cause issue
 
-# Monday - Friday
-55 16 * * 1-5 root /usr/bin/printf "26-on" > /run/bell.fifo
-00 17 * * 1-5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
-25 17 * * 1-5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
-30 17 * * 1-5 root /usr/bin/printf "26-off" > /run/bell.fifo
+# Monday
+#55 16 * * 1 root /usr/bin/printf "26-on" > /run/bell.fifo
+#00 17 * * 1 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+#25 17 * * 1 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+#30 17 * * 1 root /usr/bin/printf "26-off" > /run/bell.fifo
+
+# Tuesday
+55 16 * * 2 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 17 * * 2 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 17 * * 2 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 17 * * 2 root /usr/bin/printf "26-off" > /run/bell.fifo
+
+# Wednesday
+#55 16 * * 3 root /usr/bin/printf "26-on" > /run/bell.fifo
+#00 17 * * 3 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+#25 17 * * 3 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+#30 17 * * 3 root /usr/bin/printf "26-off" > /run/bell.fifo
+
+# Thursday
+55 16 * * 4 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 17 * * 4 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 17 * * 4 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 17 * * 4 root /usr/bin/printf "26-off" > /run/bell.fifo
+
+# Friday
+55 16 * * 5 root /usr/bin/printf "26-on" > /run/bell.fifo
+00 17 * * 5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 17 * * 5 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 17 * * 5 root /usr/bin/printf "26-off" > /run/bell.fifo
+
 # Saturday
 55 16 * * 6 root /usr/bin/printf "26-on" > /run/bell.fifo
 00 17 * * 6 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
 25 17 * * 6 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
-30 18 * * 6 root /usr/bin/printf "26-off" > /run/bell.fifo
+25 18 * * 6 root /usr/bin/printf "26-off" > /run/bell.fifo
+
 # Sunday
+25 08 * * 0 root /usr/bin/printf "26-on" > /run/bell.fifo
+20 09 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
 40 10 * * 0 root /usr/bin/printf "26-on" > /run/bell.fifo
 45 10 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
 10 11 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
-15 12 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
+30 12 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
 55 17 * * 0 root /usr/bin/printf "26-on" > /run/bell.fifo
 00 18 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
 25 18 * * 0 root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
-20 19 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
+25 19 * * 0 root /usr/bin/printf "26-off" > /run/bell.fifo
 
+# Holiday1
+25 08 01 01 * root /usr/bin/printf "26-on" > /run/bell.fifo
+30 09 01 01 * root /usr/bin/printf "26-off" > /run/bell.fifo
+40 10 01 01 * root /usr/bin/printf "26-on" > /run/bell.fifo
+45 10 01 01 * root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+10 11 01 01 * root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+30 12 01 01 * root /usr/bin/printf "26-off" > /run/bell.fifo
+55 17 01 01 * root /usr/bin/printf "26-on" > /run/bell.fifo
+00 18 01 01 * root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 18 01 01 * root /usr/bin/printf "1-FESTA.wav" > /run/bell.fifo
+25 19 01 01 * root /usr/bin/printf "26-off" > /run/bell.fifo
+ 
+# Holiday2
+#25 08 26 12 * root /usr/bin/printf "26-on" > /run/bell.fifo
+#30 09 26 12 * root /usr/bin/printf "26-off" > /run/bell.fifo
+#40 10 26 12 * root /usr/bin/printf "26-on" > /run/bell.fifo
+#45 10 26 12 * root /usr/bin/printf "1-festa.wav" > /run/bell.fifo
+#10 11 26 12 * root /usr/bin/printf "1-festa.wav" > /run/bell.fifo
+#30 12 26 12 * root /usr/bin/printf "26-off" > /run/bell.fifo
+#55 17 26 12 * root /usr/bin/printf "26-on" > /run/bell.fifo
+#00 18 26 12 * root /usr/bin/printf "1-festa.wav" > /run/bell.fifo
+#25 18 26 12 * root /usr/bin/printf "1-festa.wav" > /run/bell.fifo
+#25 19 26 12 * root /usr/bin/printf "26-off" > /run/bell.fifo
