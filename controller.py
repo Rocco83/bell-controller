@@ -56,7 +56,7 @@ def run_fifo(filename):
             pinValue = GPIO.HIGH
         GPIO.output(int(pinNumber), pinValue)
     else:
-        my_logger.debug("No match with filename '%s%s' and no match with pin '%s' and action '%s'" % (sound_basedir, filename, pinNumber, pinValue))
+        my_logger.debug("No match with filename '%s%s' and no match with pin '%s' and action '%s'" % (sound_basedir, filename, pinNumber, pinAction))
         return False
 
 ## now we'll define two threaded callback functions
