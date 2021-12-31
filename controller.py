@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # script inspirate by Alex Eames http://RasPi.tv
 # http://RasPi.tv/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio-part-3
 # GPIO 17: start bell FESTA
@@ -11,7 +11,7 @@ import RPi.GPIO as GPIO
 import time
 import pygame
 import fcntl, sys, os
-import thread
+import _thread
 import errno
 import logging
 import logging.handlers
@@ -140,7 +140,7 @@ def gpio_pressed(pin):
     audio = audio_filename(pin)
     if ( audio != "" ):
         my_logger.debug("play audio: '%s'" % audio)
-        thread.start_new_thread(play_audio, (audio,))
+        _thread.start_new_thread(play_audio, (audio,))
     if ( pin == 13 ):
         stop_audio(pin)
     if ( pin == 6 ):
@@ -181,7 +181,7 @@ try:
         my_logger.debug("%s existing, removing" % fifo_file)
         os.remove(fifo_file)
     os.mkfifo(fifo_file)
-except OSError, e:
+except OSError as e:
     my_logger.debug("Failed to create FIFO, error: '%s', fatal error" % e)
     sys.exit(1)
 # open the pipe
@@ -244,7 +244,7 @@ try:
         #print ext_command
         try:
             buffer = os.read(fifo_fp, BUFFER_SIZE)
-            buffer_clean = buffer.strip('\n\r')
+            buffer_clean = buffer.decode("utf-8").strip('\n\r')
         except OSError as err:
             if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                 buffer = None
@@ -261,8 +261,9 @@ try:
 
 except KeyboardInterrupt:
     my_logger.debug("CTRL+C pressed, exiting")
-except Exception, e:
-    my_logger.debug("Not handled exception '%s', exiting", e)
+except Exception as e:
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    my_logger.debug("Not handled exception '%s', on line %s exiting", e, exc_tb.tb_lineno)
 finally:
     my_logger.debug("Gracefully finally exit")
     GPIO.cleanup()       # clean up GPIO on exiting from try

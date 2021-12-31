@@ -1,11 +1,12 @@
 # Bell Controller
 ## A bell controller, designed for church
 
-This software has been built on Debian Jessie, on a Raspberry PI 2, using python 2.7.
+This software has been tested on Debian Bullseye, on a Raspberry PI 3, using python 3.9.
 
 ### Packages needed
-* python (main debian repository)
-* python-rpi.gpio (main raspbian repository)
+* python3 (main debian repository)
+* python3-rpi.gpio (main raspbian repository)
+* python3-pygame
 
 To be checked for other dependencies.
 
@@ -76,7 +77,7 @@ There are two main component outside raspberry.
 
 ## TODO
 ### Web interface
-A web interface is needed to change the cron
+A web interface is welcome to change the cron
 
 ### Privilege sepaeration
 The root user is not really needed to run this software. Especially if the web server has to be implemented to change the cron.
