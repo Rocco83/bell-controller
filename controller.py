@@ -222,6 +222,7 @@ GPIO.add_event_detect(6, GPIO.RISING, bouncetime=500, callback=gpio_pressed)
 signal.signal(signal.SIGTERM, clean_exit)
 
 try:
+    exitcode = 0
     my_logger.debug("main()")
     my_logger.debug("17: %s, 27: %s, 22: %s, 13: %s, 6: %s" % ( input17, input27, input22, input13, input6))
     while True:
@@ -244,26 +245,33 @@ try:
         #print ext_command
         try:
             buffer = os.read(fifo_fp, BUFFER_SIZE)
-            buffer_clean = buffer.decode("utf-8").strip('\n\r')
+            #buffer_clean = buffer.decode("utf-8").strip('\n\r')
+            buffer_clean_list = buffer.decode("utf-8").splitlines()
         except OSError as err:
             if err.errno == errno.EAGAIN or err.errno == errno.EWOULDBLOCK:
                 buffer = None
             else:
                 raise  # something else has happened -- better reraise
+        # if the list hwve elements, print them
+        if( len(buffer_clean_list) > 0 ):
+            my_logger.debug("buffer_clean_list: %s" % ( ','.join(buffer_clean_list)))
         #buffer_clean = lambda dirty: ''.join(filter(string.printable.__contains__, buffer))
         # moved in the try above, or the error below may happes 
         # Not handled exception ''NoneType' object has no attribute 'strip'
         #buffer_clean = buffer.strip('\n\r')
-        if buffer_clean is not None and buffer_clean != '':  
-            # buffer_clean contains some received data -- do something with it
-            my_logger.debug("buffer_clean: '%s'" % buffer_clean)
-            run_fifo(buffer_clean)
+        for buffer_clean in buffer_clean_list:
+          if buffer_clean is not None and buffer_clean != '':
+              # buffer_clean contains some received data -- do something with it
+              my_logger.debug("buffer_clean: '%s'" % buffer_clean)
+              my_logger.debug("buffer_clean ASCII: '%s'" % [ord(c) for c in buffer_clean])
+              run_fifo(buffer_clean)
 
 except KeyboardInterrupt:
     my_logger.debug("CTRL+C pressed, exiting")
 except Exception as e:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     my_logger.debug("Not handled exception '%s', on line %s exiting", e, exc_tb.tb_lineno)
+    exitcode = 1
 finally:
     my_logger.debug("Gracefully finally exit")
     GPIO.cleanup()       # clean up GPIO on exiting from try
@@ -273,5 +281,5 @@ finally:
     fp.close()
     os.remove(pid_file)
     my_logger.debug("cleanup completed, exit now")
-
+    sys.exit(exitcode)
 
